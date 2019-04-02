@@ -1,0 +1,833 @@
+第一题代码
+对test1处理的代码：
+t1=imread('test1.pgm');
+
+T1=cell(9,6);
+p=zeros(1,9);
+T1{1,1}=fftshift(fft2(t1));
+
+[x,y]=size(T1{1,1});
+
+butter20=zeros(x,y);
+butter40=zeros(x,y);
+butter60=zeros(x,y);
+butter41=zeros(x,y);
+butter42=zeros(x,y);
+gauss1=zeros(x,y);
+gauss2=zeros(x,y);
+gauss3=zeros(x,y);
+
+for u=1:x
+    for v=1:y
+        d=((u-x/2)^2+(v-y/2)^2)^0.5;
+        butter20(u,v)=1/(1+(d/20)^2);
+        butter40(u,v)=1/(1+(d/40)^2);
+        butter60(u,v)=1/(1+(d/60)^2);
+        butter41(u,v)=1/(1+(d/40)^4);
+        butter42(u,v)=1/(1+(d/40)^6);
+        gauss1(u,v)=exp(-d^2/(2*20^2));
+        gauss2(u,v)=exp(-d^2/(2*40^2));
+        gauss3(u,v)=exp(-d^2/(2*60^2));
+    end
+end
+
+b1=uint8(butter20*255);
+b2=uint8(butter40*255);
+b3=uint8(butter60*255);
+b21=uint8(butter41*255);
+b22=uint8(butter42*255);
+g1=uint8(gauss1*255);
+g2=uint8(gauss2*255);
+g3=uint8(gauss3*255);
+
+figure(1)
+subplot(1,3,1)
+imshow(b1)
+title('半径为20的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b2)
+title('半径为40的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b3)
+title('半径为60的巴特沃斯滤波器')
+
+figure(2)
+subplot(1,3,1)
+imshow(b2)
+title('n=1的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b21)
+title('n=2的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b22)
+title('n=3的巴特沃斯滤波器')
+
+figure(3)
+subplot(1,3,1)
+imshow(g1)
+title('半径为20的高斯滤波器')
+subplot(1,3,2)
+imshow(g2)
+title('半径为40的高斯滤波器')
+subplot(1,3,3)
+imshow(g3)
+title('半径为60的高斯滤波器')
+
+T1{2,1}=T1{1,1}.*butter20;
+T1{3,1}=T1{1,1}.*butter40;
+T1{4,1}=T1{1,1}.*butter60;
+T1{5,1}=T1{1,1}.*butter41;
+T1{6,1}=T1{1,1}.*butter42;
+T1{7,1}=T1{1,1}.*gauss1;
+T1{8,1}=T1{1,1}.*gauss2;
+T1{9,1}=T1{1,1}.*gauss3;
+
+T=log10(1+abs(T1{1,1}));
+
+for i=1:9
+    T1{i,2}=log10(1+abs(T1{i,1}));
+    T1{i,2}=255*(T1{i,2}-min(min(T)))/(max(max(T))-min(min(T)));
+    T1{i,3}=uint8(T1{i,2});
+    T1{i,4}=uint8(abs(ifft2(fftshift(T1{i,1}))));
+    T1{i,5}=abs(T1{i,1}).^2;
+    T1{i,6}=sum(sum(T1{i,5}));
+    p(1,i)=T1{i,6}/T1{1,6};
+end
+
+figure(4)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,3})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,3})
+title('半径为40的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,3})
+title('半径为60的巴特沃斯滤波器滤波')
+
+figure(5)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,3})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,3})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,3})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(6)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,3})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,3})
+title('半径为40的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,3})
+title('半径为60的高斯滤波器滤波')
+
+figure(7)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,4})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,4})
+title('半径为40的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,4})
+title('半径为60的巴特沃斯滤波器滤波')
+
+figure(8)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,4})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,4})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,4})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(9)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,4})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,4})
+title('半径为40的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,4})
+title('半径为60的高斯滤波器滤波')
+
+p
+
+
+对test2处理的代码：
+t2=imread('test2.tif');
+
+T1=cell(9,6);
+p=zeros(1,9);
+T1{1,1}=fftshift(fft2(t2));
+
+[x,y]=size(T1{1,1});
+
+butter20=zeros(x,y);
+butter40=zeros(x,y);
+butter60=zeros(x,y);
+butter41=zeros(x,y);
+butter42=zeros(x,y);
+gauss1=zeros(x,y);
+gauss2=zeros(x,y);
+gauss3=zeros(x,y);
+
+for u=1:x
+    for v=1:y
+        d=((u-x/2)^2+(v-y/2)^2)^0.5;
+        butter20(u,v)=1/(1+(d/20)^2);
+        butter40(u,v)=1/(1+(d/40)^2);
+        butter60(u,v)=1/(1+(d/60)^2);
+        butter41(u,v)=1/(1+(d/40)^4);
+        butter42(u,v)=1/(1+(d/40)^6);
+        gauss1(u,v)=exp(-d^2/(2*20^2));
+        gauss2(u,v)=exp(-d^2/(2*40^2));
+        gauss3(u,v)=exp(-d^2/(2*60^2));
+    end
+end
+
+b1=uint8(butter20*255);
+b2=uint8(butter40*255);
+b3=uint8(butter60*255);
+b21=uint8(butter41*255);
+b22=uint8(butter42*255);
+g1=uint8(gauss1*255);
+g2=uint8(gauss2*255);
+g3=uint8(gauss3*255);
+
+figure(1)
+subplot(1,3,1)
+imshow(b1)
+title('半径为20的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b2)
+title('半径为40的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b3)
+title('半径为60的巴特沃斯滤波器')
+
+figure(2)
+subplot(1,3,1)
+imshow(b2)
+title('n=1的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b21)
+title('n=2的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b22)
+title('n=3的巴特沃斯滤波器')
+
+figure(3)
+subplot(1,3,1)
+imshow(g1)
+title('半径为20的高斯滤波器')
+subplot(1,3,2)
+imshow(g2)
+title('半径为40的高斯滤波器')
+subplot(1,3,3)
+imshow(g3)
+title('半径为60的高斯滤波器')
+
+T1{2,1}=T1{1,1}.*butter20;
+T1{3,1}=T1{1,1}.*butter40;
+T1{4,1}=T1{1,1}.*butter60;
+T1{5,1}=T1{1,1}.*butter41;
+T1{6,1}=T1{1,1}.*butter42;
+T1{7,1}=T1{1,1}.*gauss1;
+T1{8,1}=T1{1,1}.*gauss2;
+T1{9,1}=T1{1,1}.*gauss3;
+
+T=log10(1+abs(T1{1,1}));
+
+for i=1:9
+    T1{i,2}=log10(1+abs(T1{i,1}));
+    T1{i,2}=255*(T1{i,2}-min(min(T)))/(max(max(T))-min(min(T)));
+    T1{i,3}=uint8(T1{i,2});
+    T1{i,4}=uint8(abs(ifft2(fftshift(T1{i,1}))));
+    T1{i,5}=abs(T1{i,1}).^2;
+    T1{i,6}=sum(sum(T1{i,5}));
+    p(1,i)=T1{i,6}/T1{1,6};
+end
+
+figure(4)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,3})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,3})
+title('半径为40的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,3})
+title('半径为60的巴特沃斯滤波器滤波')
+
+figure(5)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,3})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,3})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,3})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(6)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,3})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,3})
+title('半径为40的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,3})
+title('半径为60的高斯滤波器滤波')
+
+figure(7)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,4})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,4})
+title('半径为40的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,4})
+title('半径为60的巴特沃斯滤波器滤波')
+
+figure(8)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,4})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,4})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,4})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(9)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,4})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,4})
+title('半径为40的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,4})
+title('半径为60的高斯滤波器滤波')
+
+p
+
+
+第二题代码
+对test3处理的代码：
+t3=imread('test3_corrupt.pgm');
+
+T1=cell(9,6);
+p=zeros(1,9);
+T1{1,1}=fftshift(fft2(t3));
+
+[x,y]=size(T1{1,1});
+
+butter20=zeros(x,y);
+butter40=zeros(x,y);
+butter60=zeros(x,y);
+butter41=zeros(x,y);
+butter42=zeros(x,y);
+gauss1=zeros(x,y);
+gauss2=zeros(x,y);
+gauss3=zeros(x,y);
+
+for u=1:x
+    for v=1:y
+        d=((u-x/2)^2+(v-y/2)^2)^0.5;
+        butter20(u,v)=1/(1+(10/d)^2);
+        butter40(u,v)=1/(1+(20/d)^2);
+        butter60(u,v)=1/(1+(30/d)^2);
+        butter41(u,v)=1/(1+(20/d)^4);
+        butter42(u,v)=1/(1+(20/d)^6);
+        gauss1(u,v)=1-exp(-d^2/(2*10^2));
+        gauss2(u,v)=1-exp(-d^2/(2*20^2));
+        gauss3(u,v)=1-exp(-d^2/(2*30^2));
+    end
+end
+
+b1=uint8(butter20*255);
+b2=uint8(butter40*255);
+b3=uint8(butter60*255);
+b21=uint8(butter41*255);
+b22=uint8(butter42*255);
+g1=uint8(gauss1*255);
+g2=uint8(gauss2*255);
+g3=uint8(gauss3*255);
+
+figure(1)
+subplot(1,3,1)
+imshow(b1)
+title('半径为10的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b2)
+title('半径为20的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b3)
+title('半径为30的巴特沃斯滤波器')
+
+figure(2)
+subplot(1,3,1)
+imshow(b2)
+title('n=1的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b21)
+title('n=2的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b22)
+title('n=3的巴特沃斯滤波器')
+
+figure(3)
+subplot(1,3,1)
+imshow(g1)
+title('半径为10的高斯滤波器')
+subplot(1,3,2)
+imshow(g2)
+title('半径为20的高斯滤波器')
+subplot(1,3,3)
+imshow(g3)
+title('半径为30的高斯滤波器')
+
+T1{2,1}=T1{1,1}.*butter20;
+T1{3,1}=T1{1,1}.*butter40;
+T1{4,1}=T1{1,1}.*butter60;
+T1{5,1}=T1{1,1}.*butter41;
+T1{6,1}=T1{1,1}.*butter42;
+T1{7,1}=T1{1,1}.*gauss1;
+T1{8,1}=T1{1,1}.*gauss2;
+T1{9,1}=T1{1,1}.*gauss3;
+
+T=log10(1+abs(T1{1,1}));
+
+for i=1:9
+    T1{i,2}=log10(1+abs(T1{i,1}));
+    T1{i,2}=255*(T1{i,2}-min(min(T)))/(max(max(T))-min(min(T)));
+    T1{i,3}=uint8(T1{i,2});
+    T1{i,4}=uint8(abs(ifft2(fftshift(T1{i,1}))));
+    T1{i,5}=abs(T1{i,1}).^2;
+    T1{i,6}=sum(sum(T1{i,5}));
+    p(1,i)=T1{i,6}/T1{1,6};
+end
+
+figure(4)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,3})
+title('半径为10的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,3})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,3})
+title('半径为30的巴特沃斯滤波器滤波')
+
+figure(5)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,3})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,3})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,3})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(6)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,3})
+title('半径为10的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,3})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,3})
+title('半径为30的高斯滤波器滤波')
+
+figure(7)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,4})
+title('半径为10的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,4})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,4})
+title('半径为30的巴特沃斯滤波器滤波')
+
+figure(8)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,4})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,4})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,4})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(9)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,4})
+title('半径为10的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,4})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,4})
+title('半径为30的高斯滤波器滤波')
+
+p
+
+
+对test4处理的代码：
+t4=imread('test4 copy.bmp');
+
+T1=cell(9,6);
+p=zeros(1,9);
+T1{1,1}=fftshift(fft2(t4));
+
+[x,y]=size(T1{1,1});
+
+butter20=zeros(x,y);
+butter40=zeros(x,y);
+butter60=zeros(x,y);
+butter41=zeros(x,y);
+butter42=zeros(x,y);
+gauss1=zeros(x,y);
+gauss2=zeros(x,y);
+gauss3=zeros(x,y);
+
+for u=1:x
+    for v=1:y
+        d=((u-x/2)^2+(v-y/2)^2)^0.5;
+        butter20(u,v)=1/(1+(10/d)^2);
+        butter40(u,v)=1/(1+(20/d)^2);
+        butter60(u,v)=1/(1+(30/d)^2);
+        butter41(u,v)=1/(1+(20/d)^4);
+        butter42(u,v)=1/(1+(20/d)^6);
+        gauss1(u,v)=1-exp(-d^2/(2*10^2));
+        gauss2(u,v)=1-exp(-d^2/(2*20^2));
+        gauss3(u,v)=1-exp(-d^2/(2*30^2));
+    end
+end
+
+b1=uint8(butter20*255);
+b2=uint8(butter40*255);
+b3=uint8(butter60*255);
+b21=uint8(butter41*255);
+b22=uint8(butter42*255);
+g1=uint8(gauss1*255);
+g2=uint8(gauss2*255);
+g3=uint8(gauss3*255);
+
+figure(1)
+subplot(1,3,1)
+imshow(b1)
+title('半径为10的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b2)
+title('半径为20的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b3)
+title('半径为30的巴特沃斯滤波器')
+
+figure(2)
+subplot(1,3,1)
+imshow(b2)
+title('n=1的巴特沃斯滤波器')
+subplot(1,3,2)
+imshow(b21)
+title('n=2的巴特沃斯滤波器')
+subplot(1,3,3)
+imshow(b22)
+title('n=3的巴特沃斯滤波器')
+
+figure(3)
+subplot(1,3,1)
+imshow(g1)
+title('半径为10的高斯滤波器')
+subplot(1,3,2)
+imshow(g2)
+title('半径为20的高斯滤波器')
+subplot(1,3,3)
+imshow(g3)
+title('半径为30的高斯滤波器')
+
+T1{2,1}=T1{1,1}.*butter20;
+T1{3,1}=T1{1,1}.*butter40;
+T1{4,1}=T1{1,1}.*butter60;
+T1{5,1}=T1{1,1}.*butter41;
+T1{6,1}=T1{1,1}.*butter42;
+T1{7,1}=T1{1,1}.*gauss1;
+T1{8,1}=T1{1,1}.*gauss2;
+T1{9,1}=T1{1,1}.*gauss3;
+
+T=log10(1+abs(T1{1,1}));
+
+for i=1:9
+    T1{i,2}=log10(1+abs(T1{i,1}));
+    T1{i,2}=255*(T1{i,2}-min(min(T)))/(max(max(T))-min(min(T)));
+    T1{i,3}=uint8(T1{i,2});
+    T1{i,4}=uint8(abs(ifft2(fftshift(T1{i,1}))));
+    T1{i,5}=abs(T1{i,1}).^2;
+    T1{i,6}=sum(sum(T1{i,5}));
+    p(1,i)=T1{i,6}/T1{1,6};
+end
+
+figure(4)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,3})
+title('半径为10的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,3})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,3})
+title('半径为30的巴特沃斯滤波器滤波')
+
+figure(5)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,3})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,3})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,3})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(6)
+subplot(2,2,1)
+imshow(T1{1,3})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,3})
+title('半径为10的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,3})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,3})
+title('半径为30的高斯滤波器滤波')
+
+figure(7)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,4})
+title('半径为10的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{3,4})
+title('半径为20的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{4,4})
+title('半径为30的巴特沃斯滤波器滤波')
+
+figure(8)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{3,4})
+title('n=1的巴特沃斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{5,4})
+title('n=2的巴特沃斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{6,4})
+title('n=3的巴特沃斯滤波器滤波')
+
+figure(9)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{7,4})
+title('半径为10的高斯滤波器滤波')
+subplot(2,2,3)
+imshow(T1{8,4})
+title('半径为20的高斯滤波器滤波')
+subplot(2,2,4)
+imshow(T1{9,4})
+title('半径为30的高斯滤波器滤波')
+
+p
+
+
+第三题代码
+对test3处理的代码：
+t3=imread('test3_corrupt.pgm');
+
+T1=cell(4,4);
+p=zeros(1,4);
+T1{1,1}=fftshift(fft2(t3));
+
+[x,y]=size(T1{1,1});
+
+lapla=zeros(x,y);
+butter20=zeros(x,y);
+gauss1=zeros(x,y);
+
+for u=1:x
+    for v=1:y
+        d=((u-x/2)^2+(v-y/2)^2)^0.5;
+        lapla(u,v)=4*pi^2*d^2;
+        butter20(u,v)=1/(1+(10/d)^2);
+        gauss1(u,v)=1-exp(-d^2/(2*10^2));
+    end
+end
+
+lapla=(lapla-min(min(lapla)))/(max(max(lapla))-min(min(lapla)));
+
+T1{2,1}=T1{1,1}.*(1+10*lapla);
+T1{3,1}=T1{1,1}.*(1+butter20);
+T1{4,1}=T1{1,1}.*(1+gauss1);
+
+T=log10(1+abs(T1{1,1}));
+
+for i=1:4
+    T1{i,2}=log10(1+abs(T1{i,1}));
+    T1{i,2}=255*(T1{i,2}-min(min(T)))/(max(max(T))-min(min(T)));
+    T1{i,3}=uint8(T1{i,2});
+    T1{i,4}=uint8(abs(ifft2(fftshift(T1{i,1}))));
+end
+
+figure(1)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,4})
+title('拉普拉斯滤波')
+subplot(2,2,3)
+imshow(T1{3,4})
+title('以巴特沃斯滤波器为模板的非掩蔽滤波')
+subplot(2,2,4)
+imshow(T1{4,4})
+title('以高斯滤波器为模板的非掩蔽滤波')
+
+
+对test4处理的代码：
+t3=imread('test4 copy.bmp');
+
+T1=cell(4,4);
+p=zeros(1,4);
+T1{1,1}=fftshift(fft2(t3));
+
+[x,y]=size(T1{1,1});
+
+lapla=zeros(x,y);
+butter20=zeros(x,y);
+gauss1=zeros(x,y);
+
+for u=1:x
+    for v=1:y
+        d=((u-x/2)^2+(v-y/2)^2)^0.5;
+        lapla(u,v)=4*pi^2*d^2;
+        butter20(u,v)=1/(1+(10/d)^2);
+        gauss1(u,v)=1-exp(-d^2/(2*10^2));
+    end
+end
+
+lapla=(lapla-min(min(lapla)))/(max(max(lapla))-min(min(lapla)));
+
+T1{2,1}=T1{1,1}.*(1+10*lapla);
+T1{3,1}=T1{1,1}.*(1+butter20);
+T1{4,1}=T1{1,1}.*(1+gauss1);
+
+T=log10(1+abs(T1{1,1}));
+
+for i=1:4
+    T1{i,2}=log10(1+abs(T1{i,1}));
+    T1{i,2}=255*(T1{i,2}-min(min(T)))/(max(max(T))-min(min(T)));
+    T1{i,3}=uint8(T1{i,2});
+    T1{i,4}=uint8(abs(ifft2(fftshift(T1{i,1}))));
+end
+
+figure(1)
+subplot(2,2,1)
+imshow(T1{1,4})
+title('原图')
+subplot(2,2,2)
+imshow(T1{2,4})
+title('拉普拉斯滤波')
+subplot(2,2,3)
+imshow(T1{3,4})
+title('以巴特沃斯滤波器为模板的非掩蔽滤波')
+subplot(2,2,4)
+imshow(T1{4,4})
+title('以高斯滤波器为模板的非掩蔽滤波')
